@@ -803,11 +803,11 @@ def _cmd_moa(rid, params, session, name, arg):
             "override": session.get("model_override"), "model": getattr(agent, "model", None),
             "provider": getattr(agent, "provider", None)}
         if agent is not None:
-            try:  # persist_override=False: turn-scoped, never persist the MoA provider to config.yaml
+            try:  # turn-scoped (never persisted to config.yaml); confirm=True: a one-shot has no confirm
+                # round-trip, so a guard answer was dropped and the turn ran on the old model (#136710)
                 _apply_model_switch(
-                    params.get("session_id", ""), session, f"{preset} --provider moa",
-                    confirm_expensive_model=False, pin_session_override=True, persist_override=False,
-                    count_switch=False)
+                    params.get("session_id", ""), session, f"{preset} --provider moa", count_switch=False,
+                    confirm_expensive_model=True, pin_session_override=True, persist_override=False)
             except Exception:
                 session.pop("moa_one_shot_restore", None)
                 raise

@@ -856,8 +856,13 @@ def _absorb_turn_result(
                 _raw = (
                     f"{_prev_model} --provider {_prev_provider}" if _prev_provider else _prev_model)
                 try:
+                    # confirm_expensive_model=True: the selection guards make a USER confirm a new
+                    # pick, and the target here is the model the session already ran on; nobody reads
+                    # a confirm-required answer on a post-turn restore, so with the guards live a
+                    # session past model.switch_context_confirm_tokens silently stayed pinned to the
+                    # MoA preset (#136710).
                     _apply_model_switch(
-                        sid, session, _raw, confirm_expensive_model=False,
+                        sid, session, _raw, confirm_expensive_model=True,
                         pin_session_override=bool(_prev_override),
                         persist_override=False, count_switch=False)  # session-internal restore, never config.yaml
                 except Exception as _moa_restore_exc:
